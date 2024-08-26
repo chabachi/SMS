@@ -1,0 +1,89 @@
+﻿@page
+@model esquire.sms.Pages.User.ReportModel
+@{
+    ViewData["Title"] = "SMS History";
+    ViewData["Page"] = @Url.RouteUrl(ViewContext.RouteData.Values);
+    Layout = "~/Pages/Shared/AdminLTE/_Layout.cshtml";
+}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">SMS History</h1>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a asp-page="/Members/Index">Home</a></li>
+                    <li class="breadcrumb-item active">SMS History</li>
+                </ol>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- left column -->
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Any discrepancies must be communicated within three (3) days of receipt.</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <table id="example2" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Mobile Number</th>
+                                    <th>Customer</th>
+                                    <th>Date Created</th>
+                                    <th style="width:15%">SMS Hist</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>09989997633</td>
+                                    <td>Charlie Bachiller</td>
+                                    <td>06/02/2024</td>
+                                    <td><a href="#" class="btn btn-block btn-primary btn-xs edit-btn">View</a></td>
+                                </tr>
+                                <tr>
+                                    <td>09989997634</td>
+                                    <td>Juan Dela Cruz</td>
+                                    <td>06/02/2024</td>
+                                    <td><a href="#" class="btn btn-block btn-primary btn-xs edit-btn">View</a></td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th>Mobile Number</th>
+                                    <th>Customer</th>
+                                    <th>Date Created</th>
+                                    <th>SMS History</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+        </div>
+    </div>
+
+</section>
+@section Scripts {
+    <script>
+        $(function () {
+            $('#example2').DataTable({
+                "paging": true,
+                "lengthChange": false,
+                "searching": false,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+            });
+        });
+    </script>
+}

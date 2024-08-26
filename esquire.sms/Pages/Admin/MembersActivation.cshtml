@@ -1,0 +1,144 @@
+﻿@page
+@model esquire.sms.Pages.Admin.MembersActivationModel
+@Html.AntiForgeryToken()
+@{
+    ViewData["Title"] = "User Activation";
+    ViewData["Page"] = @Url.RouteUrl(ViewContext.RouteData.Values);
+    Layout = "~/Pages/Shared/AdminLTE/_Layout.cshtml";
+}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">@ViewData["Title"]</h1>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a asp-page="/Admin/Index">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- left column -->
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">@ViewData["Title"]</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <table id="hoamembers-table" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                   
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th>Create Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                 
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th>Create Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+        </div>
+    </div>
+
+</section>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var table = $('#hoamembers-table').DataTable({
+                "responsive": true,
+                "ajax": {
+                    "url": "@Url.Page("MembersActivation")?handler=GetHOAMembers", // Change this to your controller action
+                    "dataSrc": ""
+                },
+                "columns": [
+                    { "data": "email" },
+                    {
+                        "data": "active", "render": function (data, type, row) {
+                            var isActive = row.active;
+
+                            var buttonLabelac = isActive ? 'Active' : 'InActive';
+                            var buttonClassac = isActive ? 'btn btn-block btn-info btn-xs' : 'btn btn-block btn-danger btn-xs';
+                            var activeButton = '<button class="' + buttonClassac + '">' + buttonLabelac + '</button>';
+
+                            return activeButton;
+                        }
+                    },
+                    {
+                        "data": "createOn", "render": function (data) {
+                            var date = new Date(data);
+                            var formattedDate = date.toLocaleDateString(); // Format the date part
+                            var formattedTime = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }); // Format the time part
+                            return formattedDate + ' ' + formattedTime;
+                        }
+                    },
+                    {
+                        "data": null, "render": function (data, type, row) {
+                            var isActive = row.active;
+                            var buttonLabel = isActive ? 'Deactivate' : 'Activate';
+                            var buttonClass = isActive ? 'btn btn-block btn-danger btn-xs deactivate-btn' : 'btn btn-block btn-info btn-xs activate-btn';
+                            var deactivateButton = '<button class="' + buttonClass + '">' + buttonLabel + '</button>';
+                            var memberId = row.id; // assuming id is the member's ID
+
+                            // Redirect to MemberEdit page with memberId as query string
+                            //var editButton = '<a href="MemberEdit?id=' + memberId + '" class="btn btn-block btn-primary btn-xs edit-btn">Edit</a>';
+
+                            return deactivateButton;
+                        }
+                    } // Button column
+                ],
+                "order": [[4, "desc"]]
+            });
+
+            // Handle click event for the button
+            $('#hoamembers-table tbody').on('click', '.activate-btn, .deactivate-btn', function () {
+                var data = $('#hoamembers-table').DataTable().row($(this).parents('tr')).data();
+                activateHOAMember(data);
+            });
+
+            function activateHOAMember(data) {
+                // Call C# handler here using Ajax
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Page("MembersActivation")?handler=ActivateHOAMember",
+                    contentType: "application/json",
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader("XSRF-TOKEN",
+                            $('input:hidden[name="__RequestVerificationToken"]').val());
+                    },
+                    data: JSON.stringify(data),
+                    success: function (response) {
+                        // Handle success response
+                        toastr.success("Upload success");
+                        table.ajax.reload();
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle error response
+                        toastr.error("Error activating HOA member:" + error);
+                    }
+                });
+            }
+        });
+    </script>
+}

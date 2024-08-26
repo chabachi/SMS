@@ -1,0 +1,144 @@
+﻿@page
+@model esquire.sms.Pages.User.SendSMSModel
+@Html.AntiForgeryToken()
+@{
+    ViewData["Title"] = "Send SMS";
+    ViewData["Page"] = @Url.RouteUrl(ViewContext.RouteData.Values);
+    Layout = "~/Pages/Shared/AdminLTE/_Layout.cshtml";
+}
+@using esquire.sms.Pages.User
+@{
+    var dropdownItems = new List<DropdownItem>
+    {
+        new DropdownItem { Value = "1",DisplayName  = "Acknowledgement of claim",  Description= "Thank you for your claim submission. We will review it and provide you an update soon. Please include claim ref.514xxxxxxx in all your communication with us." },
+        new DropdownItem { Value = "2", DisplayName = "Request for further info/ documents", Description = "Hi [Customer’s Name], we have reviewed your claim. For our further assessment, please check your email for the additional information required.Thank you." },
+        new DropdownItem { Value = "3", DisplayName = "Follow-up", Description = "Hi [Customer’s Name], your response is important to us. Please provide the requested information of your submission to prevent processing delays. Please check your email for details and reply to us soon.Thank you." },
+        new DropdownItem { Value = "4", DisplayName = "Claim adjudication outcome", Description = "Hi [Customer’s Name], we are pleased to inform you that a decision has been made on your claim. Please check your email for more details. Thank you." },
+        new DropdownItem { Value = "5", DisplayName = "Find my Iphone unlock request", Description = "Good day. We would like to request that you deactivate your Find My iPhone application. Please check your email for detailed instructions. Thank you." }
+    };
+    var initialSelectedValue = "1"; // Set your initial selected value here
+    var descriptions = dropdownItems.ToDictionary(item => item.Value, item => item.Description);
+}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">@ViewData["Title"]</h1>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a asp-page="/Admin/Index">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- left column -->
+            <div class="col-md-9">
+                <!-- general form elements -->
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">SMS Information</h3>
+                    </div>
+
+                    @*    @if (Model.Updated)
+                    {
+                    <div class="alert alert-success" role="alert">
+                    Successfully updated
+                    </div>
+                    } *@
+                    <!-- /.card-header -->
+                    <!-- form start -->
+                    <form id="yourForm" method="post">
+                        <div class="card-body">
+                            <div class="input-group mb-4">
+                                <label class="col-sm-3 col-form-label">Mobile Number</label>
+                                <input type="text" class="form-control" placeholder="Mobile Number" asp-for="SMSSendingDTO.MobileNumber">
+
+                            </div>
+                            <div class="input-group mb-4">
+                                <label class="col-sm-3 col-form-label">Customer</label>
+                                <input type="text" class="form-control" placeholder="Customer" asp-for="SMSSendingDTO.Customer">
+
+                            </div>
+                            <div class="input-group mb-4">
+                                <label class="col-sm-3 col-form-label">MessageType</label>
+                                <select class="custom-select rounded-0" asp-for="SMSSendingDTO.MessageType" onchange="updateDescription()">
+                                    @foreach (var item in dropdownItems)
+                                    {
+                                        <option value="@item.Value">@item.DisplayName</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="input-group mb-4">
+                                <label class="col-sm-3 col-form-label">Message</label>
+                                <textarea rows="4" cols="50" class="form-control" placeholder="Message" asp-for="SMSSendingDTO.Message"></textarea>
+                            </div>
+               
+                            <div class="input-group mb-4">
+                                <button type="submit" class="btn btn-success">Submit</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+@section Scripts {
+    <script>
+        // Submit form via AJAX and show toast notification
+        document.addEventListener("DOMContentLoaded", function () {
+            updateDescription();
+            document.getElementById("yourForm").addEventListener("submit", function (event) {
+                event.preventDefault(); // Prevent default form submission
+                $(this).prop('disabled', true);
+                var formData = new FormData(document.getElementById("yourForm"));
+                // Submit form data via AJAX
+                fetch('@Url.Page("/SendSMS")', {
+                    method: 'POST',
+                    body: formData,
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader("XSRF-TOKEN",
+                            $('input:hidden[name="__RequestVerificationToken"]').val());
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Check if form submission was successful
+                        if (data.success) {
+                            // Show toast notification
+                            // Example using Toastr library
+                            toastr.success("SMS message sent successfully!");
+                            setTimeout(function () {
+                                window.location.href = '@Url.Page("MembersActivation")';
+                            }, 2000); // Redirect after 2 seconds (adjust the time as needed)
+                        } else {
+                            // Handle errors if needed
+                            toastr.error("SMS sending failed! " + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        toastr.error("An error occurred!");
+                    });
+            });
+        });
+
+        var descriptions = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(descriptions));
+
+        function updateDescription() {
+            var dropdown = document.getElementById("SMSSendingDTO_MessageType");
+            var selectedValue = dropdown.value;
+            var description = descriptions[selectedValue] || "";
+            document.getElementById("SMSSendingDTO_Message").innerText = description;
+        }
+
+       
+    </script>
+}

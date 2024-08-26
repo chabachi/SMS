@@ -1,0 +1,99 @@
+﻿<script type="text/javascript">
+
+    $(document).ready(function () {
+        StartTimers();
+        $('body').on('mousemove keydown scroll', function () {
+            ResetTimers();
+        });
+
+    });
+
+    var extendMethodUrl = '/Account/Login?handler=ExtendSession';
+    var logoutUrl = '/Account/Logout';
+
+    // Set timeout variables.
+    var timoutWarning = 150000; // Adjust current timeout minus 2min
+    var warningTimer;
+    var isResetTimer = false;
+
+    // Start timers.
+    function StartTimers() {
+        warningTimer = setTimeout("IdleWarning()", timoutWarning);
+    }
+
+    // Reset timers.
+    function ResetTimers() {
+        clearTimeout(warningTimer);
+        StartTimers();
+    }
+
+    function ResetTimerButton() {
+        $.ajax({
+            type: "GET",
+            url: extendMethodUrl,
+            dataType: "json",
+            success: function successFunc(response) {
+                isResetTimer = true;
+                ResetTimers();
+                $('#divPopupTimeOut').modal('hide');
+                Swal.fire(
+                    'Session reset',
+                    'Session has been reset.',
+                    'success'
+                );
+
+            },
+            error: function () {
+                Swal.fire({
+                    title: 'Process Failed!',
+                    text: "Session reset failed. Logging out",
+                    icon: 'error',
+                    showCancelButton: false,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ok',
+                    allowOutsideClick: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location = logoutUrl;
+                    }
+                })
+            }
+        });
+    }
+
+    // Show idle timeout warning dialog for 2 mins.
+    function IdleWarning() {
+        isResetTimer = false
+        $('#divPopupTimeOut').modal({
+            backdrop: 'static',
+            keyboard: true,
+            show: true
+        });
+        _timeLeft = 120; //In seconds
+        updateCountDown();
+    }
+
+    var updateCountDown = function () {
+        if (isResetTimer)//stop countdown if session reset
+            return;
+
+        var min = Math.floor(_timeLeft / 60);
+        var sec = _timeLeft % 60;
+        if (sec < 10)
+            sec = "0" + sec;
+
+        document.getElementById("CountDownHolder").innerHTML = min + ":" + sec;
+
+        if (_timeLeft > 0) {
+            _timeLeft--;
+            setTimeout(updateCountDown, 1000);
+        }
+        else {//logout if 0 second
+            isResetTimer = true;
+            document.location = logoutUrl;
+        }
+    };
+
+
+</script>
