@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34408.163
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "esquire.sms", "esquire.sms\esquire.sms.csproj", "{200D0CA9-095D-4D7F-B27A-C209CB5D256C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "esquire.sms", "esquire.sms\esquire.sms.csproj", "{200D0CA9-095D-4D7F-B27A-C209CB5D256C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "esquire.common", "esquire.common\esquire.common.csproj", "{52A5C7DA-6054-4FC5-87D2-A91B5C23CCD8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "esquire.common", "esquire.common\esquire.common.csproj", "{52A5C7DA-6054-4FC5-87D2-A91B5C23CCD8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "esquire.services", "esquire.services\esquire.services.csproj", "{7936173E-EFA3-4B3E-B6DC-39A036641EBB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "esquire.services", "esquire.services\esquire.services.csproj", "{7936173E-EFA3-4B3E-B6DC-39A036641EBB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

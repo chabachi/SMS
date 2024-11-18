@@ -1,7 +1,7 @@
 ﻿@page
-@model esquire.sms.Pages.User.ReportModel
+@model esquire.sms.Pages.User.ReportDetailsModel
 @{
-    ViewData["Title"] = "SMS History";
+    ViewData["Title"] = "SMS History Details";
     ViewData["Page"] = @Url.RouteUrl(ViewContext.RouteData.Values);
     Layout = "~/Pages/Shared/AdminLTE/_Layout.cshtml";
 }
@@ -9,12 +9,12 @@
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
-                <h1 class="m-0">SMS History</h1>
+                <h1 class="m-0">SMS History Details</h1>
             </div><!-- /.col -->
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a asp-page="/Members/Index">Home</a></li>
-                    <li class="breadcrumb-item active">SMS History</li>
+                    <li class="breadcrumb-item"><a asp-page="#">Home</a></li>
+                    <li class="breadcrumb-item active">SMS History Details</li>
                 </ol>
             </div><!-- /.col -->
         </div><!-- /.row -->
@@ -34,31 +34,30 @@
                         <table id="example2" class="table table-bordered table-hover">
                             <thead>
                                 <tr>
-                                    <th>Mobile Number</th>
-                                    <th>Customer</th>
-                                    <th>Date Created</th>
-                                    <th style="width:15%">SMS Hist</th>
+                                    <th>MessageId</th>
+                                    <th>Message</th>
+                                    <th>Date Time Sent</th>
+                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach (var row in Model.SMSData)
                                 {
                                     <tr>
-                                        <td>@row.MobileNumber</td>
-                                        <td>@row.Customer</td>
-                                        <td>@row.CreateDate.ToShortDateString()</td>
-                                        <td>
-                                            <a href="ReportDetails?id=@row.MobileNumber" class="btn btn-block btn-primary btn-xs edit-btn">View</a>
-                                        </td>
+                                        <td>@row.MessageId</td>
+                                        <td>@row.Message</td>
+                                        <td>@row.DateTimeSent.ToString()</td>
+                                        <td class="@(row.Status == "SUCCESS" ? "text-success" : "text-danger")">@row.Status</td>
                                     </tr>
                                 }
+
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <th>Mobile Number</th>
-                                    <th>Customer</th>
-                                    <th>Date Created</th>
-                                    <th>SMS History</th>
+                                    <th>MessageId</th>
+                                    <th>Message</th>
+                                    <th>Date Time Sent</th>
+                                    <th>Status</th>
                                 </tr>
                             </tfoot>
                         </table>

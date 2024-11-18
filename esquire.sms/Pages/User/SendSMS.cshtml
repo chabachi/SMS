@@ -10,11 +10,9 @@
 @{
     var dropdownItems = new List<DropdownItem>
     {
-        new DropdownItem { Value = "1",DisplayName  = "Acknowledgement of claim",  Description= "Thank you for your claim submission. We will review it and provide you an update soon. Please include claim ref.514xxxxxxx in all your communication with us." },
-        new DropdownItem { Value = "2", DisplayName = "Request for further info/ documents", Description = "Hi [Customer’s Name], we have reviewed your claim. For our further assessment, please check your email for the additional information required.Thank you." },
-        new DropdownItem { Value = "3", DisplayName = "Follow-up", Description = "Hi [Customer’s Name], your response is important to us. Please provide the requested information of your submission to prevent processing delays. Please check your email for details and reply to us soon.Thank you." },
-        new DropdownItem { Value = "4", DisplayName = "Claim adjudication outcome", Description = "Hi [Customer’s Name], we are pleased to inform you that a decision has been made on your claim. Please check your email for more details. Thank you." },
-        new DropdownItem { Value = "5", DisplayName = "Find my Iphone unlock request", Description = "Good day. We would like to request that you deactivate your Find My iPhone application. Please check your email for detailed instructions. Thank you." }
+        new DropdownItem { Value = "1",DisplayName  = "Request for further info/ documents",  Description= "Hi <Customer’s Name>. Para matapos ang assessment ng iyong claim, i-check ang email na pinadala ng Chubb at gawin ang mga kinakailangan. Salamat." },
+        new DropdownItem { Value = "2", DisplayName = "Follow-up", Description = "Hi <Customer’s Name>. Mahalaga na ma-review namin ang iyong claim.  Kumpletuhin ang mga kinakailangang gawin para hindi ma-delay ang assessment nito. I-check ang email na pinadala ng Chubb para sa kumpletong detalye. Salamat." },
+        new DropdownItem { Value = "3", DisplayName = "Claim adjudication outcome", Description = "Hi <Customer’s Name>. May desisyon na ang iyong claim. I-check ang email na pinadala ng Chubb para sa kumpletong detalye. Salamat." },
     };
     var initialSelectedValue = "1"; // Set your initial selected value here
     var descriptions = dropdownItems.ToDictionary(item => item.Value, item => item.Description);
@@ -55,6 +53,21 @@
                     <!-- form start -->
                     <form id="yourForm" method="post">
                         <div class="card-body">
+
+                            <div class="card-body register-card-body">
+                                <div class="form-group row">
+
+                                    <div class="form-group">
+                                        <label for="files">Select Files:</label>
+                                        <input type="file" id="fileInput" name="files" class="form-control-file" accept=".csv">
+                                        <small class="form-text text-muted">Accepts csv file only. Max of 50 mobile number to send</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <a href="~/template.csv">Download template</a>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="input-group mb-4">
                                 <label class="col-sm-3 col-form-label">Mobile Number</label>
                                 <input type="text" class="form-control" placeholder="Mobile Number" asp-for="SMSSendingDTO.MobileNumber">
@@ -63,8 +76,9 @@
                             <div class="input-group mb-4">
                                 <label class="col-sm-3 col-form-label">Customer</label>
                                 <input type="text" class="form-control" placeholder="Customer" asp-for="SMSSendingDTO.Customer">
-
                             </div>
+
+
                             <div class="input-group mb-4">
                                 <label class="col-sm-3 col-form-label">MessageType</label>
                                 <select class="custom-select rounded-0" asp-for="SMSSendingDTO.MessageType" onchange="updateDescription()">
@@ -80,7 +94,7 @@
                             </div>
                
                             <div class="input-group mb-4">
-                                <button type="submit" class="btn btn-success">Submit</button>
+                                <button type="submit" id="Finalize" class="btn btn-success">Submit</button>
                             </div>
                         </div>
                     </form>
@@ -97,8 +111,10 @@
             updateDescription();
             document.getElementById("yourForm").addEventListener("submit", function (event) {
                 event.preventDefault(); // Prevent default form submission
-                $(this).prop('disabled', true);
+                $('#Finalize').prop('disabled', true).text('Sending...');
+                var file = fileInput.files[0];
                 var formData = new FormData(document.getElementById("yourForm"));
+                formData.append('file', file);
                 // Submit form data via AJAX
                 fetch('@Url.Page("/SendSMS")', {
                     method: 'POST',
@@ -115,12 +131,14 @@
                             // Show toast notification
                             // Example using Toastr library
                             toastr.success("SMS message sent successfully!");
+                            $('#Finalize').prop('disabled', false).text('Upload File');
                             setTimeout(function () {
-                                window.location.href = '@Url.Page("MembersActivation")';
+                                window.location.href = '@Url.Page("SendSMS")';
                             }, 2000); // Redirect after 2 seconds (adjust the time as needed)
                         } else {
                             // Handle errors if needed
                             toastr.error("SMS sending failed! " + data.message);
+                            $('#Finalize').prop('disabled', false).text('Upload File');
                         }
                     })
                     .catch(error => {

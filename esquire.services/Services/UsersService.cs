@@ -18,8 +18,9 @@ namespace esquire.services.Services
         public DefaultResponse Registration(Users member);
 
         public DefaultResponse SendAndSave(SMSSendingDTO data);
-
+        public List<SMSData> GetAllMobile();
         public List<UsersListDTO> GetAllMembers();
+        public List<SMSDetail> GetDetailsMobile(string mobileNumber);
         public void ActivateDeactivateMember(string email, bool Activate);
     }
     public class UsersService : IUsersService
@@ -60,7 +61,7 @@ namespace esquire.services.Services
         {
             SMSData sMSData = new SMSData();
             sMSData.SMSDetails = new List<SMSDetail>();
-
+            data.Message = data.Message.Replace("<Customer’s Name>", data.Customer);
             var check = _dataSMS.FindOne(x=>x.MobileNumber == data.MobileNumber);
             if (check != null)
             {
@@ -68,6 +69,16 @@ namespace esquire.services.Services
 
                 if (sendSMS.Count == 0)
                 {
+                    check.SMSDetails.Add(new SMSDetail
+                    {
+                        DateTimeSent = DateTime.UtcNow.AddHours(8),
+                        Message = data.Message,
+                        MessageId = "",
+                        MessageType = data.MessageType,
+                        ExecuteByUser = data.ExecutedBy,
+                        Status = "FAILED"
+                    });
+                    _dataSMS.ReplaceOne(check);
                     return new DefaultResponse
                     {
                         HttpStatusCode = System.Net.HttpStatusCode.OK,
@@ -84,7 +95,8 @@ namespace esquire.services.Services
                     Message = data.Message,
                     MessageId = smsData.message_id,
                     MessageType = data.MessageType,
-                    ExecuteByUser = data.ExecutedBy
+                    ExecuteByUser = data.ExecutedBy,
+                    Status = "SUCCESS"
                 });
 
                 _dataSMS.ReplaceOne(check);
@@ -95,6 +107,16 @@ namespace esquire.services.Services
 
                 if (sendSMS.Count == 0)
                 {
+                    sMSData.SMSDetails.Add(new SMSDetail
+                    {
+                        DateTimeSent = DateTime.UtcNow.AddHours(8),
+                        Message = data.Message,
+                        MessageId = "0",
+                        MessageType = data.MessageType,
+                        ExecuteByUser = data.ExecutedBy,
+                        Status = "FAILED"
+                    });
+                    _dataSMS.InsertOneV2(sMSData);
                     return new DefaultResponse
                     {
                         HttpStatusCode = System.Net.HttpStatusCode.OK,
@@ -104,7 +126,7 @@ namespace esquire.services.Services
                 }
 
                 var smsData = sendSMS.FirstOrDefault();
-                sMSData.CreateDate = DateTime.Now;
+                sMSData.CreateDate = DateTime.UtcNow.AddHours(8);
                 sMSData.Customer = data.Customer;
                 sMSData.MobileNumber = data.MobileNumber;
                 sMSData.NetWork = smsData.network;
@@ -115,7 +137,8 @@ namespace esquire.services.Services
                     Message = data.Message,
                     MessageId = smsData.message_id,
                     MessageType = data.MessageType,
-                    ExecuteByUser = data.ExecutedBy
+                    ExecuteByUser = data.ExecutedBy,
+                    Status = "SUCCESS"
                 });
 
                 _dataSMS.InsertOneV2(sMSData);
@@ -129,6 +152,15 @@ namespace esquire.services.Services
             };
         }
 
+        public List<SMSData> GetAllMobile()
+        {
+            return _dataSMS.FilterBy(x => x.DateDeleted == null).ToList();
+        }
+        public List<SMSDetail> GetDetailsMobile(string mobileNumber)
+        {
+            var data = _dataSMS.FilterBy(x => x.MobileNumber == mobileNumber).FirstOrDefault();
+            return data.SMSDetails.ToList();
+        }
         public List<SemaphoreResponse> SendSMS(SMSSendingDTO data)
         {
             string result = "";
@@ -137,7 +169,7 @@ namespace esquire.services.Services
                 byte[] response =
                 client.UploadValues("https://semaphore.co/api/v4/messages", new NameValueCollection()
                 {
-                    { "apikey", "" },
+                    { "apikey", "07b1793150ea88a6c45afe47acfa4c6f" },
                     { "number", data.MobileNumber },
                     { "message", data.Message },
                 });

@@ -5,21 +5,21 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace esquire.sms.Pages.User
 {
-    public class ReportModel : PageModel
+    public class ReportDetailsModel : PageModel
     {
         [BindProperty]
-        public List<SMSData> SMSData { get; set; }
+        public List<SMSDetail> SMSData { get; set; }
 
         private readonly IUsersService _userService;
 
 
-        public ReportModel(IUsersService usersService)
+        public ReportDetailsModel(IUsersService usersService)
         {
             _userService = usersService;
         }
-        public void OnGet()
+        public void OnGet(string id)
         {
-            SMSData = _userService.GetAllMobile();
+            SMSData = _userService.GetDetailsMobile(id);
         }
     }
 }

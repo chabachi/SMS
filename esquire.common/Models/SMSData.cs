@@ -27,5 +27,7 @@ namespace esquire.common.Models
         public DateTime DateTimeSent { get; set; }
 
         public string ExecuteByUser { get; set; }
+
+        public string Status { get; set; }
     }
 }
