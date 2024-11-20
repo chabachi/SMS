@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.VisualBasic.FileIO;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 using static Google.Apis.Requests.BatchRequest;
 
 namespace esquire.sms.Pages.User
@@ -18,6 +19,7 @@ namespace esquire.sms.Pages.User
     {
         [BindProperty]
         public SMSSendingDTO SMSSendingDTO { get; set; }
+        public List<SMSSendingDTO> SMSSendingListDTO { get; set; }
         [BindProperty]
         public IFormFile Upload { get; set; }
         private readonly IUsersService _userService;
@@ -28,21 +30,28 @@ namespace esquire.sms.Pages.User
             _userService = usersService;
         }
 
-       
+
         public void OnGet()
         {
         }
-
+        public bool ValidateMobileNumber(string mobileNumber)
+        {
+            // Regular expression to match a mobile number starting with 09 and exactly 11 digits
+            string pattern = @"^09\d{9}$";
+            return Regex.IsMatch(mobileNumber, pattern);
+        }
         public IActionResult OnPost()
         {
             try
             {
-                var file = Request.Form.Files[0];
+
                 string email = User.Claims.Where(x => x.Type == ClaimTypes.Email).FirstOrDefault() != null ? User.Claims.Where(x => x.Type == ClaimTypes.Email).FirstOrDefault().Value : "";
                 SMSSendingDTO.ExecutedBy = email;
 
-                if (file != null)
+                if (Request.Form.Files.Count > 0)
                 {
+                    SMSSendingListDTO = new List<SMSSendingDTO>();
+                    var file = Request.Form.Files[0];
                     string errormessage = "";
                     if (file.Length > MaxFileSizePerFile)
                     {
@@ -66,12 +75,29 @@ namespace esquire.sms.Pages.User
                             string[] fields = csvReader.ReadFields();
                             SMSSendingDTO.MobileNumber = fields[0];
                             SMSSendingDTO.Customer = fields[1];
+
+                            if (!ValidateMobileNumber(SMSSendingDTO.MobileNumber))
+                            {
+                                errormessage += SMSSendingDTO.MobileNumber + " (Invalid mobile number format.)<br />";
+                            }
+
+                            SMSSendingListDTO.Add(SMSSendingDTO);
+                        }
+
+                        if (errormessage.Length > 0)
+                        {
+                            return new JsonResult(new { success = false, message = errormessage });
+                        }
+                        errormessage = "";
+                        foreach (var row in SMSSendingListDTO)
+                        {
                             var responsebatch = _userService.SendAndSave(SMSSendingDTO);
                             if (!responsebatch.IsSuccess)
                             {
-                                errormessage += SMSSendingDTO.MobileNumber + "(FAILED),";
+                                errormessage += SMSSendingDTO.MobileNumber + "(FAILED)<br />";
                             }
                         }
+
 
                         if (errormessage.Length == 0)
                         {
@@ -85,22 +111,35 @@ namespace esquire.sms.Pages.User
                 }
                 else
                 {
-                    var response = _userService.SendAndSave(SMSSendingDTO);
-                    if (response.IsSuccess)
+                    if (string.IsNullOrEmpty(SMSSendingDTO.MobileNumber) || string.IsNullOrEmpty(SMSSendingDTO.Customer))
                     {
-                        return new JsonResult(new { success = true });
+                        return new JsonResult(new { success = false, message = "Mobile number/Customer field is required." });
+                    }
+
+                    if (ValidateMobileNumber(SMSSendingDTO.MobileNumber))
+                    {
+                        var response = _userService.SendAndSave(SMSSendingDTO);
+                        if (response.IsSuccess)
+                        {
+                            return new JsonResult(new { success = true });
+                        }
+                        else
+                        {
+                            return new JsonResult(new { success = false, message = response.Description });
+                        }
                     }
                     else
                     {
-                        return new JsonResult(new { success = false, message = response.Description });
+                        return new JsonResult(new { success = false, message = "Invalid mobile number format." });
                     }
+
                 }
             }
             catch
             {
                 return new JsonResult(new { success = false, message = "ERROR while sending message" });
             }
-            
+
         }
     }
 }

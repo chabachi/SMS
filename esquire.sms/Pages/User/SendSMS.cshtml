@@ -11,7 +11,7 @@
     var dropdownItems = new List<DropdownItem>
     {
         new DropdownItem { Value = "1",DisplayName  = "Request for further info/ documents",  Description= "Hi <Customer’s Name>. Para matapos ang assessment ng iyong claim, i-check ang email na pinadala ng Chubb at gawin ang mga kinakailangan. Salamat." },
-        new DropdownItem { Value = "2", DisplayName = "Follow-up", Description = "Hi <Customer’s Name>. Mahalaga na ma-review namin ang iyong claim.  Kumpletuhin ang mga kinakailangang gawin para hindi ma-delay ang assessment nito. I-check ang email na pinadala ng Chubb para sa kumpletong detalye. Salamat." },
+        new DropdownItem { Value = "2", DisplayName = "Follow-up", Description = "Hi <Customer’s Name>. Mahalaga na ma-review namin ang iyong claim. Kumpletuhin ang mga kinakailangang gawin para hindi ma-delay ang assessment nito. I-check ang email na pinadala ng Chubb para sa kumpletong detalye. Salamat." },
         new DropdownItem { Value = "3", DisplayName = "Claim adjudication outcome", Description = "Hi <Customer’s Name>. May desisyon na ang iyong claim. I-check ang email na pinadala ng Chubb para sa kumpletong detalye. Salamat." },
     };
     var initialSelectedValue = "1"; // Set your initial selected value here
@@ -70,12 +70,12 @@
 
                             <div class="input-group mb-4">
                                 <label class="col-sm-3 col-form-label">Mobile Number</label>
-                                <input type="text" class="form-control" placeholder="Mobile Number" asp-for="SMSSendingDTO.MobileNumber">
+                                <input type="text" class="form-control" placeholder="09123456789" asp-for="SMSSendingDTO.MobileNumber">
 
                             </div>
                             <div class="input-group mb-4">
                                 <label class="col-sm-3 col-form-label">Customer</label>
-                                <input type="text" class="form-control" placeholder="Customer" asp-for="SMSSendingDTO.Customer">
+                                <input type="text" class="form-control" placeholder="Juan Dela Cruz" asp-for="SMSSendingDTO.Customer">
                             </div>
 
 
