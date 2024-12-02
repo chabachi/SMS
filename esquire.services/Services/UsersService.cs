@@ -185,8 +185,7 @@ namespace esquire.services.Services
         public List<UsersListDTO> GetAllMembers()
         {
             List<UsersListDTO> returnData = new List<UsersListDTO>();
-            var deliquentData = _dateMembers.FilterBy(x=>true);
-            var member = _dateMembers.FilterBy(x => true).ToList();
+            var member = _dateMembers.FilterBy(x => x.UserType == "MEMBER").ToList();
 
             foreach (var x in member)
             {

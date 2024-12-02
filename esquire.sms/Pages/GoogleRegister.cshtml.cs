@@ -60,7 +60,7 @@ namespace esquire.sms.Pages
                             }
                             if (validateUser.UserType == "ADMIN")
                             {
-                                return RedirectToPage("/Admin/Index");
+                                return RedirectToPage("/Admin/MembersActivation");
                             }
                         }
 
