@@ -15,7 +15,7 @@ namespace esquire.sms.Pages.User
         public string Description { get; set; }
         public string DisplayName { get; set; }
     }
-    public class SendSMSModel : PageModel
+    public class SendSMSModel : BasePageModel
     {
         [BindProperty]
         public SMSSendingDTO SMSSendingDTO { get; set; }

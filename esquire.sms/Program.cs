@@ -10,6 +10,8 @@ namespace esquire.sms
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            var configSettings = builder.Configuration.GetSection("ConfigurationSettings");
+            int expireMinutes = configSettings.GetValue<int>("AuthenticationMinutes");
 
             // Add services to the container.
             builder.Services.AddRazorPages();
@@ -28,13 +30,17 @@ namespace esquire.sms
             })
             .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
             {
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(15);
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(expireMinutes);
                 options.SlidingExpiration = true;
                 options.LoginPath = "/Index";
                 options.LogoutPath = "/Index";
                 options.ReturnUrlParameter = "";
             });
 
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Login"; // Adjusted to match the new location
+            });
 
             builder.Services.AddAuthorization(options =>
             {
