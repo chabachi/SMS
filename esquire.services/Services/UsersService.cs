@@ -18,7 +18,7 @@ namespace esquire.services.Services
         public DefaultResponse Registration(Users member);
 
         public DefaultResponse SendAndSave(SMSSendingDTO data);
-        public List<SMSData> GetAllMobile();
+        public List<SMSDataList> GetAllMobile();
         public List<UsersListDTO> GetAllMembers();
         public List<SMSDetail> GetDetailsMobile(string mobileNumber);
         public void ActivateDeactivateMember(string email, bool Activate);
@@ -152,9 +152,25 @@ namespace esquire.services.Services
             };
         }
 
-        public List<SMSData> GetAllMobile()
+        public List<SMSDataList> GetAllMobile()
         {
-            return _dataSMS.FilterBy(x => x.DateDeleted == null).ToList();
+            var data = _dataSMS.FilterBy(x => x.DateDeleted == null).ToList();
+            var smsData = new List<SMSDataList>();
+
+            foreach (var row in data)
+            {
+                smsData.Add(new SMSDataList
+                { 
+                    Customer = row.Customer,
+                    MobileNumber = row.MobileNumber,
+                    DateTimeSent = row.SMSDetails.OrderByDescending(x=>x.DateTimeSent).FirstOrDefault().DateTimeSent,
+                    NetWork = row.NetWork,
+                    SmsCount = row.SMSDetails.Count(),
+                    SMSDetails = row.SMSDetails,
+                });
+            }
+
+            return smsData;
         }
         public List<SMSDetail> GetDetailsMobile(string mobileNumber)
         {

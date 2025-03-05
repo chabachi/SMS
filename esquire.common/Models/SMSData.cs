@@ -17,6 +17,16 @@ namespace esquire.common.Models
         public List<SMSDetail> SMSDetails { get; set; }
     }
 
+    public class SMSDataList
+    {
+        public string MobileNumber { get; set; }
+        public string Customer { get; set; }
+        public string NetWork { get; set; }
+        public int SmsCount { get; set; }
+        public DateTime DateTimeSent { get; set; }
+        public List<SMSDetail> SMSDetails { get; set; }
+    }
+
     public class SMSDetail
     { 
         public string MessageId { get; set; }

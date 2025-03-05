@@ -29,36 +29,98 @@
                     <div class="card-header">
                         <h3 class="card-title">Any discrepancies must be communicated within three (3) days of receipt.</h3>
                     </div>
+
+                   
                     <!-- /.card-header -->
                     <div class="card-body">
+                        <form method="post">
+                            <div>
+                                <label for="dateFrom">From: </label>
+                                <input type="date" id="dateFrom" name="dateFrom" value="@Model.DateFrom" />
+                                <label for="dateEnd">To: </label>
+                                <input type="date" id="dateEnd" name="dateEnd" value="@Model.DateEnd" />
+                            </div>
+                            <button type="submit">Filter</button>
+                        </form>
+                        <br />
                         <table id="example2" class="table table-bordered table-hover">
                             <thead>
                                 <tr>
                                     <th>Mobile Number</th>
                                     <th>Customer</th>
-                                    <th>Date Created</th>
-                                    <th style="width:15%">SMS Hist</th>
+                                    <th>SMS Count</th>
+                                    <td>1st</td>
+                                    <td>Date</td>
+                                    <td>2nd</td>
+                                    <td>Date</td>
+                                    <td>3rd</td>
+                                    <td>Date</td>
+                                    <td>Last SMS Sent Date</td>
+                                    <td style="width:15%">SMS Hist</td>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var row in Model.SMSData)
+                                @foreach (var row in Model.SmsData)
                                 {
                                     <tr>
                                         <td>@row.MobileNumber</td>
                                         <td>@row.Customer</td>
-                                        <td>@row.CreateDate.ToShortDateString()</td>
+                                        <td>@row.SMSDetails.Count()</td>
+
+                                        <td>
+                                            @(row.SMSDetails.Where(x => x.MessageType == "1")
+                                                .OrderByDescending(x => x.DateTimeSent)
+                                                .FirstOrDefault()?.Message?.ToString() ?? "")
+                                        </td>
+                                        <td>
+                                            @(row.SMSDetails.Where(x => x.MessageType == "1")
+                                                .OrderByDescending(x => x.DateTimeSent)
+                                                .FirstOrDefault()?.DateTimeSent.ToString() ?? "")
+                                        </td>
+
+                                        <td>
+                                            @(row.SMSDetails.Where(x => x.MessageType == "2")
+                                                .OrderByDescending(x => x.DateTimeSent)
+                                                .FirstOrDefault()?.Message?.ToString() ?? "")
+                                        </td>
+                                        <td>
+                                            @(row.SMSDetails.Where(x => x.MessageType == "2")
+                                                .OrderByDescending(x => x.DateTimeSent)
+                                                .FirstOrDefault()?.DateTimeSent.ToString() ?? "")
+                                        </td>
+
+                                        <td>
+                                            @(row.SMSDetails.Where(x => x.MessageType == "3")
+                                                .OrderByDescending(x => x.DateTimeSent)
+                                                .FirstOrDefault()?.Message?.ToString() ?? "")
+                                        </td>
+                                        <td>
+                                            @(row.SMSDetails.Where(x => x.MessageType == "3")
+                                                .OrderByDescending(x => x.DateTimeSent)
+                                                .FirstOrDefault()?.DateTimeSent.ToString() ?? "")
+                                        </td>
+                                        <td>@row.SMSDetails.OrderByDescending(x => x.DateTimeSent).FirstOrDefault().DateTimeSent.ToString()</td>
                                         <td>
                                             <a href="ReportDetails?id=@row.MobileNumber" class="btn btn-block btn-primary btn-xs edit-btn">View</a>
                                         </td>
                                     </tr>
                                 }
+
+
                             </tbody>
                             <tfoot>
                                 <tr>
                                     <th>Mobile Number</th>
                                     <th>Customer</th>
-                                    <th>Date Created</th>
-                                    <th>SMS History</th>
+                                    <th>SMS Count</th>
+                                    <td>1st</td>
+                                    <td>Date</td>
+                                    <td>2nd</td>
+                                    <td>Date</td>
+                                    <td>3rd</td>
+                                    <td>Date</td>
+                                    <td>Last SMS Sent Date</td>
+                                    <td style="width:15%">SMS Hist</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -73,6 +135,32 @@
 </section>
 @section Scripts {
     <script>
+        $.fn.dataTable.ext.type.order['custom-datetime-pre'] = function (date) {
+            // Parse the date into a sortable format (timestamp)
+            // Using JavaScript Date to parse the specific format "MM/DD/YYYY hh:mm:ss am/pm"
+            const parts = date.match(/(\d{2})\/(\d{2})\/(\d{4}) (\d{1,2}):(\d{2}):(\d{2}) (am|pm)/i);
+            if (parts) {
+                const month = parseInt(parts[1], 10) - 1; // JavaScript months are 0-based
+                const day = parseInt(parts[2], 10);
+                const year = parseInt(parts[3], 10);
+                let hour = parseInt(parts[4], 10);
+                const minute = parseInt(parts[5], 10);
+                const second = parseInt(parts[6], 10);
+                const meridian = parts[7].toLowerCase();
+
+                // Convert to 24-hour format
+                if (meridian === 'pm' && hour < 12) {
+                    hour += 12;
+                } else if (meridian === 'am' && hour === 12) {
+                    hour = 0;
+                }
+
+                // Return timestamp for sorting
+                return new Date(year, month, day, hour, minute, second).getTime();
+            }
+            return 0; // Return 0 if the date format is invalid
+        };
+
         $(function () {
             $('#example2').DataTable({
                 "paging": true,
@@ -83,6 +171,13 @@
                 "autoWidth": false,
                 "responsive": true,
                 "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"],
+                "order": [[9, 'desc']], // Automatically sort the 4th column
+                "columnDefs": [
+                    {
+                        "targets": 9, // 4th column
+                        "type": "custom-datetime" // Use the custom sorting type
+                    }
+                ]
             }).buttons().container().appendTo('#example2_wrapper .col-md-6:eq(0)');
         });
     </script>
